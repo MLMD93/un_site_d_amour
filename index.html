@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L'Écho de l'Amour</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+:root {
+  --bg-start:#fdf6f0;
+  --bg-end:#f3e7e9;
+  --text:#3a2e2e;
+  --text-soft:#6b5b5b;
+  --card-bg: rgba(255,255,255,0.62);
+  --card-border: rgba(255,255,255,0.5);
+  --accent:#dc2626;
+  --accent-2:#b91c1c;
+  --gold:#c9973b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-start:#120a1e;
+    --bg-end:#2b1330;
+    --text:#f3e9e9;
+    --text-soft:#cbb8c4;
+    --card-bg: rgba(25,15,35,0.55);
+    --card-border: rgba(255,255,255,0.12);
+    --accent:#fb7185;
+    --accent-2:#f43f5e;
+    --gold:#e8c07d;
+  }
+}
+:root[data-theme="dark"] {
+  --bg-start:#120a1e;
+  --bg-end:#2b1330;
+  --text:#f3e9e9;
+  --text-soft:#cbb8c4;
+  --card-bg: rgba(25,15,35,0.55);
+  --card-border: rgba(255,255,255,0.12);
+  --accent:#fb7185;
+  --accent-2:#f43f5e;
+  --gold:#e8c07d;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+
+body {
+  font-family: 'Playfair Display', serif;
+  background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  min-height: 100%;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  transition: background 0.6s ease, color 0.6s ease;
+  overflow-x: hidden;
+}
+
+.font-cursive { font-family: 'Dancing Script', cursive; }
+
+#particles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 24px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+  transition: background 0.6s ease, border-color 0.6s ease;
+}
+
+.title-shimmer {
+  background: linear-gradient(90deg, var(--accent-2), var(--gold), var(--accent), var(--gold), var(--accent-2));
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+@keyframes shimmer {
+  to { background-position: 300% center; }
+}
+
+/* Theme toggle */
+.theme-toggle {
+  position: fixed;
+  top: calc(1rem + env(safe-area-inset-top, 0px));
+  right: 1rem;
+  z-index: 20;
+  width: 44px; height: 44px;
+  border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.6s ease;
+}
+.theme-toggle:hover { transform: scale(1.08) rotate(15deg); }
+.theme-toggle svg { color: var(--gold); }
+
+/* Envelope */
+.envelope-wrapper { perspective: 1200px; }
+.envelope {
+  position: relative;
+  width: min(280px, 80vw);
+  height: 180px;
+  margin: 0 auto;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.envelope.hidden-away {
+  opacity: 0;
+  transform: scale(0.85) translateY(-10px);
+  pointer-events: none;
+}
+.envelope-body {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #f3d9c4, #e8bfa0);
+  border-radius: 10px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+.envelope-body::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, transparent 48%, rgba(0,0,0,0.06) 50%, transparent 52%);
+}
+.envelope-flap {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 55%;
+  background: linear-gradient(135deg, #eec6a1, #dba57e);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top center;
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(.65,0,.35,1);
+  z-index: 2;
+}
+.envelope-flap.open { transform: rotateX(180deg); }
+.wax-seal {
+  position: absolute;
+  top: 44%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+  cursor: pointer;
+  z-index: 3;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+.wax-seal:hover { transform: translate(-50%, -50%) scale(1.06); }
+.wax-seal.cracked {
+  transform: translate(-50%, -50%) scale(1.4) rotate(18deg);
+  opacity: 0;
+}
+.wax-seal svg { width: 24px; height: 24px; color: #fde9e9; }
+
+.reveal-text {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+.reveal-text.visible { opacity: 1; transform: translateY(0); }
+
+input::placeholder { color: var(--text-soft); opacity: 0.7; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col justify-center items-center p-4">
+
+<canvas id="particles"></canvas>
+
+<button id="theme-toggle" class="theme-toggle" aria-label="Changer de thème" title="Changer d'ambiance">
+  <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+  </svg>
+</button>
+
+<main class="w-full max-w-2xl mx-auto glass-card p-6 md:p-12 text-center relative z-10">
+
+  <header class="mb-8">
+    <h1 class="text-5xl md:text-6xl font-cursive title-shimmer mb-4 tracking-wide">
+      L'Écho de l'Amour
+    </h1>
+
+    <div id="envelope-wrapper" class="envelope-wrapper my-6">
+      <div id="envelope" class="envelope">
+        <div class="envelope-body"></div>
+        <div id="envelope-flap" class="envelope-flap"></div>
+        <button id="wax-seal" class="wax-seal" aria-label="Ouvrir la lettre">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <p class="text-sm italic" id="instruction-text" style="color: var(--text-soft);">Cliquez sur le cachet pour ouvrir la lettre...</p>
+  </header>
+
+  <article id="poem-container" class="hidden flex flex-col gap-6 text-lg md:text-xl leading-relaxed">
+    <p class="reveal-text">
+      Il y a dans tes yeux la douceur de l'aurore,<br>
+      Un feu silencieux que mon âme dévore.<br>
+      Chaque mot que tu dis est une mélodie,<br>
+      Qui berce mon cœur et chasse l'ennui.
+    </p>
+
+    <p class="reveal-text">
+      Comme l'océan qui caresse le rivage,<br>
+      Ton sourire efface l'ombre des nuages.<br>
+      Dans ce monde si grand, tu es mon seul port,<br>
+      Mon refuge paisible, mon plus beau trésor.
+    </p>
+
+    <p class="reveal-text">
+      Si le temps s'enfuit, que les saisons passent,<br>
+      Rien ne saurait ternir l'amour qui nous enlace.<br>
+      Aujourd'hui et demain, pour l'éternité,<br>
+      Je n'ai qu'un seul désir : à tes côtés rester.
+    </p>
+
+    <div class="mt-8 pt-8 reveal-text flex flex-col items-center gap-4" style="border-top: 1px solid var(--card-border);">
+      <p class="font-cursive text-3xl" style="color: var(--accent);">Éternellement</p>
+
+      <div class="flex flex-col sm:flex-row gap-3 mt-4 w-full items-center justify-center">
+        <input type="text" id="love-name" placeholder="Le nom de votre amour..."
+          class="px-4 py-2 rounded-full focus:outline-none focus:ring-2 w-64 text-center text-sm md:text-base"
+          style="background: rgba(255,255,255,0.4); border: 1px solid var(--card-border); color: var(--text);">
+        <button id="send-love-btn"
+          class="text-white px-6 py-2 rounded-full transition-transform duration-300 shadow-md flex items-center gap-2 hover:scale-105"
+          style="background: var(--accent);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+          </svg>
+          Envoyer
+        </button>
+      </div>
+      <p class="text-xs" style="color: var(--text-soft);">(un joli message local — rien n'est réellement transmis)</p>
+      <p id="message-status" class="text-sm hidden mt-2 opacity-0 transition-opacity duration-500" style="color: var(--accent);" aria-live="polite"></p>
+
+      <button id="share-btn" class="text-xs underline mt-2" style="color: var(--text-soft);">Partager cette lettre</button>
+    </div>
+  </article>
+
+</main>
+
+<footer class="mt-12 text-sm pb-4 relative z-10" style="color: var(--text-soft);">
+  &copy; 2026 Conçu avec passion.
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ---------- Thème jour / nuit ---------- */
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-icon');
+  const sunPath = 'M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z';
+  const moonPath = 'M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z';
+
+  function applyThemeIcon(isDark) {
+    themeIcon.querySelector('path').setAttribute('d', isDark ? sunPath : moonPath);
+  }
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyThemeIcon(prefersDark);
+
+  themeToggle.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme');
+    const isDarkNow = current === 'dark' || (!current && prefersDark);
+    const next = isDarkNow ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    applyThemeIcon(next === 'dark');
+  });
+
+  /* ---------- Système de particules (canvas) ---------- */
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles = [];
+  const MAX_PARTICLES = 60;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function heartPath(size) {
+    const p = new Path2D();
+    p.moveTo(0, size * 0.3);
+    p.bezierCurveTo(-size * 0.5, -size * 0.3, -size, size * 0.2, 0, size);
+    p.bezierCurveTo(size, size * 0.2, size * 0.5, -size * 0.3, 0, size * 0.3);
+    return p;
+  }
+
+  const palette = ['220,38,38', '236,72,153', '248,113,113', '201,151,59', '251,113,133'];
+
+  function spawnParticle() {
+    const size = Math.random() * 10 + 6;
+    particles.push({
+      x: Math.random() * w,
+      y: h + size,
+      size,
+      speed: Math.random() * 0.6 + 0.35,
+      swayAmp: Math.random() * 30 + 10,
+      swayFreq: Math.random() * 0.015 + 0.005,
+      phase: Math.random() * Math.PI * 2,
+      rotation: (Math.random() - 0.5) * 0.6,
+      color: palette[Math.floor(Math.random() * palette.length)],
+      life: 0,
+      maxLife: Math.random() * 400 + 400
+    });
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, w, h);
+    if (particles.length < MAX_PARTICLES && Math.random() < 0.12) spawnParticle();
+
+    particles.forEach((p, i) => {
+      p.life++;
+      p.y -= p.speed;
+      const x = p.x + Math.sin(p.life * p.swayFreq + p.phase) * p.swayAmp;
+      const progress = p.life / p.maxLife;
+      const opacity = progress < 0.15 ? progress / 0.15 : progress > 0.85 ? (1 - progress) / 0.15 : 1;
+
+      ctx.save();
+      ctx.translate(x, p.y);
+      ctx.rotate(p.rotation * Math.sin(p.life * 0.01));
+      ctx.fillStyle = `rgba(${p.color}, ${Math.max(0, opacity * 0.55)})`;
+      ctx.fill(heartPath(p.size));
+      ctx.restore();
+
+      if (p.y < -p.size * 2 || p.life > p.maxLife) particles.splice(i, 1);
+    });
+
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  function heartBurst(count) {
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        if (particles.length < MAX_PARTICLES + 30) spawnParticle();
+      }, Math.random() * 400);
+    }
+  }
+
+  /* ---------- Ouverture de l'enveloppe ---------- */
+  const waxSeal = document.getElementById('wax-seal');
+  const envelopeFlap = document.getElementById('envelope-flap');
+  const envelope = document.getElementById('envelope');
+  const instructionText = document.getElementById('instruction-text');
+  const poemContainer = document.getElementById('poem-container');
+  const revealTexts = document.querySelectorAll('.reveal-text');
+
+  waxSeal.addEventListener('click', () => {
+    waxSeal.classList.add('cracked');
+    instructionText.style.opacity = '0';
+
+    setTimeout(() => envelopeFlap.classList.add('open'), 250);
+
+    setTimeout(() => {
+      envelope.classList.add('hidden-away');
+      poemContainer.classList.remove('hidden');
+      revealTexts.forEach((el, index) => {
+        setTimeout(() => el.classList.add('visible'), 400 * (index + 1));
+      });
+      heartBurst(18);
+    }, 1000);
+  }, { once: true });
+
+  /* ---------- Envoi du message ---------- */
+  const sendBtn = document.getElementById('send-love-btn');
+  const nameInput = document.getElementById('love-name');
+  const messageStatus = document.getElementById('message-status');
+
+  sendBtn.addEventListener('click', () => {
+    const name = nameInput.value.trim();
+    if (!name) {
+      nameInput.focus();
+      return;
+    }
+    messageStatus.textContent = `Un message d'amour virtuel a été envoyé à ${name} ! 💌`;
+    messageStatus.classList.remove('hidden');
+    setTimeout(() => { messageStatus.style.opacity = '1'; }, 10);
+    nameInput.value = '';
+    heartBurst(20);
+    setTimeout(() => {
+      messageStatus.style.opacity = '0';
+      setTimeout(() => messageStatus.classList.add('hidden'), 500);
+    }, 4000);
+  });
+
+  /* ---------- Partage ---------- */
+  const shareBtn = document.getElementById('share-btn');
+  shareBtn.addEventListener('click', async () => {
+    const shareData = {
+      title: "L'Écho de l'Amour",
+      text: "Une lettre d'amour pour toi...",
+      url: window.location.href
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareData.url);
+        shareBtn.textContent = 'Lien copié !';
+        setTimeout(() => { shareBtn.textContent = 'Partager cette lettre'; }, 2000);
+      }
+    } catch (e) { /* partage annulé, rien à faire */ }
+  });
+});
+</script>
+</body>
+</html>
